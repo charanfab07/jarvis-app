@@ -1,26 +1,19 @@
-export async function POST(request) {
+import { NextResponse } from 'next/server';
+import { GoogleGenerativeAI } from '@google/generative-ai';
+
+export async function POST(req) {
     try {
-        const { message, personality } = await request.json();
+        const { message } = await req.json();
 
-        const prompt = `You are JARVIS, a personal AI assistant with personality: ${personality}. Be concise and stay in character. User says: ${message}`;
+        const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-        const res = await fetch(
-            `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
-            {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    contents: [{ parts: [{ text: prompt }] }],
-                }),
-            }
-        );
+        const result = await model.generateContent(message);
+        const reply = await result.response.text();
 
-        const data = await res.json();
-        const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || "No response";
-
-        return Response.json({ reply });
-
+        return NextResponse.json({ reply });
     } catch (error) {
-        return Response.json({ reply: "Error: " + error.message }, { status: 500 });
+        console.error(error);
+        return NextResponse.json({ reply: `Error: ${error.message}` });
     }
 }
