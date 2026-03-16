@@ -1,19 +1,5 @@
-import { NextResponse } from 'next/server';
-import { GoogleGenerativeAI } from '@google/generative-ai';
-
-export async function POST(req) {
-    try {
-        const { message } = await req.json();
-
-        const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-
-        const result = await model.generateContent(message);
-        const reply = await result.response.text();
-
-        return NextResponse.json({ reply });
-    } catch (error) {
-        console.error(error);
-        return NextResponse.json({ reply: `Error: ${error.message}` });
-    }
+export async function POST(request) {
+    const { message, personality } = await request.json();
+    // ... your Gemini API code with GEMINI_API_KEY ...
+    return Response.json({ reply: "I am JARVIS..." });
 }
